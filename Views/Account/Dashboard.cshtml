@@ -1,0 +1,9 @@
+@using Microsoft.AspNetCore.Http
+
+<h2>Welcome to Dashboard</h2>
+
+<p>
+    Logged in as @Context.Session.GetString("User")
+</p>
+
+<a asp-controller="Account" asp-action="Logout">Logout</a>

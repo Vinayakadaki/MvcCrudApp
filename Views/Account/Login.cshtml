@@ -1,0 +1,27 @@
+@model MvcCrudApp.Models.LoginModel
+@using Microsoft.AspNetCore.Http
+
+<h2>Login</h2>
+
+@using (Html.BeginForm())
+{
+    <div>
+        Username:
+        @Html.TextBoxFor(m => m.Username)
+    </div>
+
+    <br />
+
+    <div>
+        Password:
+        @Html.PasswordFor(m => m.Password)
+    </div>
+
+    <br />
+
+    <input type="submit" value="Login" />
+
+    <p style="color:red">
+        @ViewBag.Message
+    </p>
+}
