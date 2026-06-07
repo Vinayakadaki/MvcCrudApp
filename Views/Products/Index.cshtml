@@ -1,9 +1,18 @@
 @model IEnumerable<MvcCrudApp.Models.Product>
 
 <h2>Products</h2>
-<a asp-action="Create">Add New</a>
-<table>
-    <tr><th>Name</th><th>Price</th><th>Actions</th></tr>
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(m => m.First().Name)</th>
+            <th>@Html.DisplayNameFor(m => m.First().Price)</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
     @foreach (var item in Model)
     {
         <tr>
@@ -11,8 +20,10 @@
             <td>@item.Price</td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
                 <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
             </td>
         </tr>
     }
+    </tbody>
 </table>

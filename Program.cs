@@ -1,18 +1,23 @@
+using Microsoft.EntityFrameworkCore;
 using MvcCrudApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Register DbContext with SQLite
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlite("Data Source=products.db"));
+
+// Add MVC services
 builder.Services.AddControllersWithViews();
 
+// Add HttpClient for external calls
 builder.Services.AddHttpClient();
 
 // Register LogicAppService for Dependency Injection
-builder.Services.AddScoped<MvcCrudApp.Services.LogicAppService>();
+builder.Services.AddScoped<LogicAppService>();
 
 // Session Services
 builder.Services.AddDistributedMemoryCache();
-
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
@@ -22,7 +27,7 @@ builder.Services.AddSession(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure the HTTP request pipeline
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -31,18 +36,19 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// Enable serving static files from wwwroot
+app.UseStaticFiles();
+
 app.UseRouting();
 
-// Session Middleware
+// Enable session middleware
 app.UseSession();
 
 app.UseAuthorization();
 
-app.MapStaticAssets();
-
+// Default route (points to Account/Login initially)
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Account}/{action=Login}/{id?}")
-    .WithStaticAssets();
+    pattern: "{controller=Account}/{action=Login}/{id?}");
 
 app.Run();

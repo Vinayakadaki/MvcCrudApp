@@ -1,16 +1,21 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using MvcCrudApp.Models;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace MvcCrudApp.Controllers
 {
     public class ProductsController : Controller
     {
-        private static List<Product> _products = new List<Product>();
+        private readonly ApplicationDbContext _context;
+
+        public ProductsController(ApplicationDbContext context)
+        {
+            _context = context;
+        }
 
         // READ
-        public IActionResult Index() => View(_products);
+        public IActionResult Index() => View(_context.Products.ToList());
 
         // CREATE (GET)
         public IActionResult Create() => View();
@@ -19,15 +24,19 @@ namespace MvcCrudApp.Controllers
         [HttpPost]
         public IActionResult Create(Product product)
         {
-            product.Id = _products.Count + 1;
-            _products.Add(product);
-            return RedirectToAction("Index");
+            if (ModelState.IsValid)
+            {
+                _context.Products.Add(product);
+                _context.SaveChanges();
+                return RedirectToAction("Index");
+            }
+            return View(product);
         }
 
         // UPDATE (GET)
         public IActionResult Edit(int id)
         {
-            var product = _products.FirstOrDefault(p => p.Id == id);
+            var product = _context.Products.Find(id);
             return View(product);
         }
 
@@ -35,31 +44,41 @@ namespace MvcCrudApp.Controllers
         [HttpPost]
         public IActionResult Edit(Product product)
         {
-            var existing = _products.FirstOrDefault(p => p.Id == product.Id);
-            if (existing != null)
+            if (ModelState.IsValid)
             {
-                existing.Name = product.Name;
-                existing.Price = product.Price;
+                _context.Products.Update(product);
+                _context.SaveChanges();
+                return RedirectToAction("Index");
             }
-            return RedirectToAction("Index");
-        }
-
-        // DELETE (GET)
-        public IActionResult Delete(int id)
-        {
-            var product = _products.FirstOrDefault(p => p.Id == id);
             return View(product);
         }
 
-        // DELETE (POST)
-        [HttpPost, ActionName("Delete")]
-        public IActionResult DeleteConfirmed(int id)
-        {
-            var product = _products.FirstOrDefault(p => p.Id == id);
-            if (product != null)
-                _products.Remove(product);
 
-            return RedirectToAction("Index");
-        }
+       // GET: Products/Delete/5
+public async Task<IActionResult> Delete(int? id)
+{
+    if (id == null) return NotFound();
+
+    var product = await _context.Products
+        .FirstOrDefaultAsync(m => m.Id == id);
+    if (product == null) return NotFound();
+
+    return View(product);
+}
+
+// POST: Products/Delete/5
+[HttpPost, ActionName("Delete")]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> DeleteConfirmed(int id)
+{
+    var product = await _context.Products.FindAsync(id);
+    if (product != null)
+    {
+        _context.Products.Remove(product);
+        await _context.SaveChangesAsync();
+    }
+    return RedirectToAction(nameof(Index));
+}
+
     }
 }

@@ -16,11 +16,15 @@ public class AccountController : Controller
     }
 
     [HttpPost]
-    public IActionResult Login(string username, string password)
+    public async Task<IActionResult> Login(string username, string password)
     {
         if (username == "admin" && password == "admin123")
         {
             HttpContext.Session.SetString("User", username);
+
+            // Call Logic App to send email
+            await _logicAppService.SendLoginDetails(username);
+
             return RedirectToAction("Index", "Products");
         }
 
